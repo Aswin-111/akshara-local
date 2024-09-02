@@ -424,7 +424,7 @@ export default function Home() {
                     // WALS_code: ""
                     (async function () {
                       const response = await axios.post(
-                        "http://localhost:5000/api/getdetails",
+                        `${process.env.NEXT_PUBLIC_BASE_URL}/api/getdetails`,
                         {
                           target: i.Name,
                         }
