@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
-    "sync": "node ./models/sync.js"
+    "sync": "node ./models/sync.js",
+    "seed": "node ./seed.js",
+    "country": "node ./dummy.js"
   },
   "keywords": [],
   "author": "",

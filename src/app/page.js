@@ -65,7 +65,7 @@
 //   const mapRef = useRef(null);
 
 //   useEffect(() => {
-//     const apiKey = 'AIzaSyDsiwyoqgC6v57aMFkdl1M6iGPkrTZA_gA'
+//     
 
 //     const script = document.createElement('script');
 //     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
@@ -184,66 +184,12 @@ import Image from "next/image";
 import log from "../../public/logo.png";
 
 import axios from "axios";
-const data = {
-  polygons: [
-    {
-      coordinates: [
-        [74.86743335224068, 12.823163087236154],
-        [74.92576137484386, 12.547692987426657],
-        [75.26941304142085, 11.991322437409721],
-        [75.58375942331338, 11.532017875284595],
-        [75.94998064654968, 10.724557903006996],
-        [76.1936215307353, 10.24100147962659],
-        [76.31347371282413, 9.53001959801621],
-        [76.46207918471669, 9.140338984323606],
-        [76.65188308306818, 8.776600386971339],
-        [76.76046025493127, 8.547192944257262],
-        [76.95122538743146, 8.384017516428898],
-        [77.18348005100802, 8.314386705942852],
-        [77.37622422482593, 8.716745612380407],
-        [77.17104899541312, 8.92106043427647],
-        [77.25320636153504, 9.028467719875678],
-        [77.37812944793114, 9.350113872616362],
-        [77.36570264538068, 9.565222289047114],
-        [77.1877698024955, 9.620109551341102],
-        [77.20295301991729, 9.848351667300918],
-        [77.28742014931424, 10.130051924651056],
-        [77.23425986534676, 10.345378077587853],
-        [76.90447055183267, 10.292975294536873],
-        [76.85202877956556, 10.629419795991211],
-        [76.79917132723688, 10.88516965482846],
-        [76.52776105638475, 11.289809602039014],
-        [76.35097047082309, 11.532899491783809],
-        [76.4484740031458, 11.695032781298892],
-        [76.13354056695368, 11.911687905677056],
-        [75.63914524781427, 12.10145491508311],
-        [75.28202958763353, 12.631902181970247],
-        [74.86743335224068, 12.823163087236154],
-      ],
-      strokeColor: "#FF0000",
-      fillColor: "#FF0000",
-    },
-    {
-      coordinates: [
-        [76.68178937304685, 21.279740957721074],
-        [77.01132387028366, 21.94679522509601],
-        [78.04516381092026, 21.625746355420887],
-        [78.54164690512329, 21.153876649277123],
-        [78.26950430180091, 20.142869883065856],
-        [77.40473052880134, 20.015945909907316],
-        [76.49378520895061, 20.48769331609384],
-        [77.27125656017841, 21.03137481034014],
-        [76.62712127365228, 21.277852970202403],
-      ],
-      strokeColor: "#FF0000",
-      fillColor: "#FF0000",
-    },
-  ],
-};
+
 
 export default function Home() {
   const mapRef = useRef(null);
   const [countryName, setCountryName] = useState("");
+  const [clickeditem, setClicked] = useState("");
   const [sidebardata, setSidebarData] = useState([]);
   const [sidebardataclone, setSidebarClone] = useState([]);
   const [carddata, setCard] = useState({})
@@ -253,10 +199,10 @@ export default function Home() {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
   useEffect(() => {
-    const apiKey = "AIzaSyDsiwyoqgC6v57aMFkdl1M6iGPkrTZA_gA";
+    
 
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&callback=initMap`;
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
@@ -311,7 +257,10 @@ export default function Home() {
         }
       });
 
+
+
       // Add click event listener to get country name
+      
       map.addListener("click", (event) => {
         const lat = event.latLng.lat();
         const lng = event.latLng.lng();
@@ -335,6 +284,18 @@ export default function Home() {
           }
         }
         getCountryName();
+      });
+       data.polygons.forEach((polygonData) => {
+        const polygon = new window.google.maps.Polygon({
+          paths: polygonData.coordinates.map(([lng, lat]) => ({ lat, lng })),
+          strokeColor: polygonData.strokeColor,
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: polygonData.fillColor,
+          fillOpacity: 0.35,
+        });
+
+        polygon.setMap(map);
       });
     };
 
@@ -360,6 +321,66 @@ export default function Home() {
 
     getLangData();
   }, [countryName]);
+
+  useEffect(()=>{
+    const data = {
+      "language" : "malayalam",
+      "polygons": [
+        {
+          "coordinates": [
+            [74.86743335224068, 12.823163087236154],
+            [74.92576137484386, 12.547692987426657],
+            [75.26941304142085, 11.991322437409721],
+            [75.58375942331338, 11.532017875284595],
+            [75.94998064654968, 10.724557903006996],
+            [76.1936215307353, 10.24100147962659],
+            [76.31347371282413, 9.53001959801621],
+            [76.46207918471669, 9.140338984323606],
+            [76.65188308306818, 8.776600386971339],
+            [76.76046025493127, 8.547192944257262],
+            [76.95122538743146, 8.384017516428898],
+            [77.18348005100802, 8.314386705942852],
+            [77.37622422482593, 8.716745612380407],
+            [77.17104899541312, 8.92106043427647],
+            [77.25320636153504, 9.028467719875678],
+            [77.37812944793114, 9.350113872616362],
+            [77.36570264538068, 9.565222289047114],
+            [77.1877698024955, 9.620109551341102],
+            [77.20295301991729, 9.848351667300918],
+            [77.28742014931424, 10.130051924651056],
+            [77.23425986534676, 10.345378077587853],
+            [76.90447055183267, 10.292975294536873],
+            [76.85202877956556, 10.629419795991211],
+            [76.79917132723688, 10.88516965482846],
+            [76.52776105638475, 11.289809602039014],
+            [76.35097047082309, 11.532899491783809],
+            [76.4484740031458, 11.695032781298892],
+            [76.13354056695368, 11.911687905677056],
+            [75.63914524781427, 12.10145491508311],
+            [75.28202958763353, 12.631902181970247],
+            [74.86743335224068, 12.823163087236154]
+          ],
+          "strokeColor": "#FF0000",
+          "fillColor": "#FF0000"
+        },
+        {
+          "coordinates": [
+            [76.68178937304685, 21.279740957721074],
+            [77.01132387028366, 21.94679522509601],
+            [78.04516381092026, 21.625746355420887],
+            [78.54164690512329, 21.153876649277123],
+            [78.26950430180091, 20.142869883065856],
+            [77.40473052880134, 20.015945909907316],
+            [76.49378520895061, 20.48769331609384],
+            [77.27125656017841, 21.03137481034014],
+            [76.62712127365228, 21.277852970202403]
+          ],
+          "strokeColor": "#FF0000",
+          "fillColor": "#FF0000"
+        }
+      ]
+    };
+  },[])
   return (
     <div className="flex ">
       <div className="w-[20vw] h-[100vh] bg-white flex flex-col items-center">
@@ -451,8 +472,8 @@ export default function Home() {
                 <div
                   className={
                     clickedData.clicked === true && clickedData.char === index
-                      ? "px-5 py-3 border-2   rounded-xl text-white bg-[#5f9253] cursor-pointer"
-                      : "px-5 py-3 border-2   rounded-xl text-black cursor-pointer"
+                      ? "px-5 py-3 border-2 border-green-500 rounded-xl text-white bg-[#5f9253] cursor-pointer"
+                      : "px-5 py-3 border-2  border-slate-400 rounded-xl text-black cursor-pointer"
                   }
                   key={index}
                   onClick={() => {

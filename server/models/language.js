@@ -84,6 +84,10 @@ const Language = sequelize.define('Language', {
   Other_Names: {
     type: DataTypes.STRING,
     allowNull: true
+  },
+  States: {
+    type: DataTypes.STRING,
+    allowNull: true
   }
 }, {
   tableName: 'languages',
