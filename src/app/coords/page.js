@@ -33,7 +33,7 @@ function Admin() {
   useEffect(()=>{
 
     (async ()=>{
-      const response = await axios.get("http://localhost:5000/api/coords")
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL/coords}`)
 
   
     
