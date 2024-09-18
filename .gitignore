@@ -36,3 +36,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+write.py
+test.js
+data.js
+dataclean.js
+kerala.svg
+sample.js
