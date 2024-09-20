@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import log from '../../public/logo.png';
+import log from '../../../public/logo.png';
 import axios from 'axios';
 
 export default function Home() {
