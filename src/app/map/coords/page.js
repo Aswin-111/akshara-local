@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import countries from "../utils/countries.json";
+import countries from "../../utils/countries.json";
 import axios from "axios";
 function Admin() {
   const [selected,setSelected] = useState([])
