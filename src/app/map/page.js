@@ -332,7 +332,7 @@ export default function Home() {
       const mapInstance = new window.google.maps.Map(mapRef.current, {
         center: { lat: 20, lng: 0 },
         zoom: 3,
-        minZoom: 4,
+        minZoom: 3,
         maxZoom: 7,
         mapTypeId: 'roadmap',
         disableDefaultUI: true,
@@ -542,7 +542,7 @@ export default function Home() {
       
       
       {sidebartoggle && (
-      <div className="w-[12vw] h-[100vh] bg-white flex flex-col items-center">
+      <div className="w-[20vw] h-[100vh] bg-white flex flex-col items-center">
         <Image src={log} className="w-11 h-11 mt-5" alt="logo" />
         <h3 className="text-black font-semibold text-xl mt-10">{countryName}</h3>
         <p className="text-black mt-3">Available Languages</p>
@@ -550,7 +550,7 @@ export default function Home() {
 {infotoggle === false ? (
         <div className="w-full px-4 overflow-y-scroll flex justify-center">
 
-          <div className=" flex gap-y-5 flex-col  absolute left-3 mt-5 max-h-[69vh] overflow-y-scroll">
+          <div className=" flex gap-y-5 flex-col  absolute left-5 mt-5 max-h-[69vh] overflow-y-scroll">
 
             {alphabet.split('').map((letter, index) => (
               <div
@@ -565,14 +565,14 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <div className='w-[40%]'>
+          <div className='w-[10rem] pl-5'>
             {sidebarData.map((i, index) => (
               <div
                 style={{ overflowX: 'hidden' }}
-                className={` px-7 py-3 mt-5 border-2 ${toggle.toggle === true && toggle.char === i
+                className={` w-full py-3 mt-5 border-2 ${toggle.toggle === true && toggle.char === i
                     ? 'text-white bg-[#5f9253] border-green-500'
                     : 'text-black border-slate-400'
-                  } flex justify-center rounded-[0.7rem] cursor-pointer`}
+                  } flex justify-center rounded-[0.5rem] cursor-pointer`}
                 key={index}
                 onClick={() => handleSidebarClick(i)}
               >
@@ -587,7 +587,7 @@ export default function Home() {
 
     {toggle.toggle && (
       <div className="w-full flex flex-col items-center ">
-        <div className="overflow-y-scroll overflow-x-hidden  w-[10vw] h-[50vh] rounded-xl px-10 bg-white">
+        <div className="overflow-y-scroll overflow-x-hidden  w-[10vw] h-[35vh] rounded-xl px-10 bg-white">
           <div className='w-full'>
             {cardData && Object.keys(cardData).length > 0 ? (
               Object.entries(cardData).map(([key, value]) => (
@@ -605,7 +605,7 @@ export default function Home() {
         </div>
 
 
-        <button className="w-[60%] bg-red-400 text-white py-3 rounded-xl mt-3" 
+        <button className="w-[60%] bg-red-400 text-white py-3 rounded-xl " 
         onClick = {
         (e)=>{
           setToggle({ toggle: !toggle.toggle, char: 0 });
@@ -621,7 +621,7 @@ export default function Home() {
       )
     }
       <div className="main">
-        <div ref={mapRef} className={`${sidebartoggle ? "w-[88vw] h-[100vh] relative" : "w-[100vw] h-[100vh] relative"}`} id="map"></div>
+        <div ref={mapRef} className={`${sidebartoggle ? "w-[80vw] h-[100vh] relative" : "w-[100vw] h-[100vh] relative"}`} id="map"></div>
         {/* {sidebarData.length > 0 && (
           <div id="overlay" className=" px-16 py-5 text-black text-[1rem] rounded-xl">
             <div className="w-full flex gap-5 flex-wrap px-10">
