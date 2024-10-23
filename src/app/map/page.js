@@ -391,6 +391,10 @@ export default function Home() {
               
             }
             setSideToggle(true)
+      setToggle({ toggle: false, char: 0 });
+      
+      setInfoToggle(false)
+            
           } catch (err) {
             console.log(err);
           }
