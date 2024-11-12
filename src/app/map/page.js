@@ -307,6 +307,7 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import log from '../../../public/logo.png';
 import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 
 // export default function Home() {
 //   const mapRef = useRef(null);
@@ -673,6 +674,7 @@ export default function Home() {
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);
   const [countryName, setCountryName] = useState('');
+  const [totalcount, setTotalCount] = useState(0);
   const [sidebarData, setSidebarData] = useState([]);
   const [sidebarDataClone, setSidebarClone] = useState([]);
   const [cardData, setCard] = useState({});
@@ -750,8 +752,10 @@ export default function Home() {
             if (response.data.address.country) {
               setCountryName(response.data.address.country);
             }
-            setSideToggle(true)
+            // setSideToggle(true)
           } catch (err) {
+            setSideToggle(false)
+
             console.log(err);
           }
         }
@@ -781,9 +785,32 @@ export default function Home() {
             `${process.env.NEXT_PUBLIC_BASE_URL}/list-language`,
             { country: countryName }
           );
+
+          const formatter = new Intl.NumberFormat('en-US', {
+            notation: 'compact',
+            compactDisplay: 'short'
+          });
+          console.log(response.data.length)
+          const formattedNumber = formatter.format(Number(response.data.languages.length > 0 ? response.data.languages.length : 0)); 
+
           setSidebarData(response.data.languages);
+          setSideToggle(true)
+          setTotalCount(formattedNumber)
           setSidebarClone(response.data.languages);
+        
+          
+   
         } catch (err) {
+          
+
+          setSideToggle(false)
+          
+          toast(`Languages not found for country ${countryName}`, {
+            style : {
+                width : "70vw"
+            }
+          }
+        )
           console.log(err);
         }
       }
@@ -913,15 +940,17 @@ export default function Home() {
 
   return (
     <div className="flex">
+      <div><Toaster/></div>
       {sidebartoggle && (
         <div className="w-[20vw] h-[100vh] bg-white flex flex-col items-center">
-          <Image src={log} className="w-11 h-11 mt-5" alt="logo" />
-          <h3 className="text-black font-semibold text-xl mt-10">{countryName}</h3>
-          <p className="text-black mt-3">Available Languages</p>
-
+          <div className='flex flex-col items-center absolute bottom-[16vh]'>
+          <Image src={log} className="w-11 h-11 " alt="logo" />
+          <h3 className="text-black font-semibold text-xl mt-5">{countryName}</h3>
+          <p className="text-black mt-3">Total Languages   {totalcount}</p>
+</div>
           {infotoggle === false ? (
             <div className="w-full px-4 overflow-y-scroll flex justify-center">
-              <div className="flex gap-y-5 flex-col absolute left-3 mt-5 max-h-[40vh] overflow-y-scroll">
+              <div className="flex gap-y-5 flex-col absolute left-3 mt-5 max-h-[55vh] overflow-y-scroll">
                 {alphabet.split('').map((letter, index) => (
                   <div
                     className={`px-2 py-2 border-2 flex justify-center items-center ${clickedData.clicked === true && clickedData.char === letter
@@ -935,7 +964,7 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              <div className='w-[40%] max-h-[40vh]'>
+              <div className='w-[40%] max-h-[55vh]'>
                 {sidebarData.map((i, index) => (
                   <div
                     style={{ overflowX: 'hidden' }}
