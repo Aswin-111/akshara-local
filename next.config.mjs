@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
-
-export default nextConfig;
+const nextConfig = {
+    distDir: process.env.NEXT_PUBLIC_DIST ,
+    
+  };
+  
+  export default nextConfig;
