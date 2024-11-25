@@ -1042,6 +1042,824 @@
 // import { Toaster, toast } from 'react-hot-toast';
 // import log from '../public/assets/logo.png';
 
+// ---------------------------------------------------------------------- currently working code--------------------
+// "use client"
+// import { useEffect, useRef, useState } from 'react';
+// import Image from 'next/image';
+// import log from '../../../public/logo.png';
+// import axios from 'axios';
+// import toast, { Toaster } from 'react-hot-toast';
+
+// export default function Home() {
+//   const mapRef = useRef(null);
+//   const [map, setMap] = useState(null);
+//   const [countryName, setCountryName] = useState('');
+//   const [totalcount, setTotalCount] = useState(0);
+//   const [sidebarData, setSidebarData] = useState([]);
+//   const [sidebarDataClone, setSidebarClone] = useState([]);
+//   const [cardData, setCard] = useState({});
+//   const [clickedData, setClickedData] = useState({ clicked: false, char: 0 });
+//   const [toggle, setToggle] = useState({ toggle: false, char: 0 });
+//   const [sidebartoggle, setSideToggle] = useState(false);
+//   const [infotoggle, setInfoToggle] = useState(false);
+//   const [activePolygons, setActivePolygons] = useState([]);
+//   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+//   // Inactivity timer setup
+//   useEffect(() => {
+//     let inactivityTimer;
+    
+//     const resetTimer = () => {
+//       if (inactivityTimer) {
+//         clearTimeout(inactivityTimer);
+//       }
+//       inactivityTimer = setTimeout(() => {
+//         window.location.reload();
+//       }, 300000); // 5 minutes
+//     };
+    
+//     const activityEvents = [
+//       'mousedown',
+//       'mousemove',
+//       'keydown',
+//       'scroll',
+//       'touchstart',
+//       'touchmove'
+//     ];
+    
+//     activityEvents.forEach(event => {
+//       document.addEventListener(event, resetTimer);
+//     });
+    
+//     resetTimer();
+    
+//     return () => {
+//       if (inactivityTimer) {
+//         clearTimeout(inactivityTimer);
+//       }
+//       activityEvents.forEach(event => {
+//         document.removeEventListener(event, resetTimer);
+//       });
+//     };
+//   }, []);
+
+//   // Google Maps initialization
+//   useEffect(() => {
+//     const script = document.createElement('script');
+//     script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&callback=initMap`;
+//     script.async = true;
+//     script.defer = true;
+//     document.head.appendChild(script);
+
+//     window.initMap = () => {
+//       const mapInstance = new window.google.maps.Map(mapRef.current, {
+//         center: { lat: 20, lng: 0 },
+//         zoom: 3,
+//         minZoom: 3,
+//         maxZoom: 7,
+//         mapTypeId: 'roadmap',
+//         disableDefaultUI: true,
+//         streetViewControl: false,
+//         fullscreenControl: false,
+//         mapTypeControl: false,
+//         restriction: {
+//           latLngBounds: {
+//             north: 85,
+//             south: -85,
+//             west: -180,
+//             east: 180,
+//           },
+//           strictBounds: true,
+//         },
+//       });
+
+//       setMap(mapInstance);
+
+//       mapInstance.addListener('center_changed', () => {
+//         const center = mapInstance.getCenter();
+//         let lng = center.lng();
+//         if (lng < -170) {
+//           lng += 360;
+//         } else if (lng > 180) {
+//           lng -= 360;
+//         }
+//         if (lng !== center.lng()) {
+//           mapInstance.panTo({ lat: center.lat(), lng: lng });
+//         }
+//       });
+
+//       mapInstance.addListener('zoom_changed', () => {
+//         if (mapInstance.getZoom() < mapInstance.get('minZoom')) {
+//           mapInstance.setZoom(mapInstance.get('minZoom'));
+//         }
+//         if (mapInstance.getZoom() > mapInstance.get('maxZoom')) {
+//           mapInstance.setZoom(mapInstance.get('maxZoom'));
+//         }
+//       });
+
+//       mapInstance.addListener('click', (event) => {
+//         const lat = event.latLng.lat();
+//         const lng = event.latLng.lng();
+//         console.log(lat, lng);
+
+//         async function getCountryName() {
+//           try {
+//             const response = await axios.get(
+//               `https://nominatim.openstreetmap.org/reverse?format=json&lat=${String(lat)}&lon=${String(lng)}&zoom=18&addressdetails=1`
+//             );
+//             console.log(response);
+//             if (response.data.address.country) {
+//               setCountryName(response.data.address.country);
+//             }
+//           } catch (err) {
+//             setSideToggle(false);
+//             console.log(err);
+//           }
+//         }
+//         getCountryName();
+//       });
+//     };
+
+//     return () => {
+//       document.head.removeChild(script);
+//       delete window.initMap;
+//     };
+//   }, []);
+
+//   // Clear polygons function
+//   const clearPolygons = () => {
+//     activePolygons.forEach(polygon => {
+//       polygon.setMap(null);
+//     });
+//     setActivePolygons([]);
+//   };
+
+//   // Fetch language data when country changes
+//   useEffect(() => {
+//     async function getLangData() {
+//       if (countryName) {
+//         try {
+//           const response = await axios.post(
+//             `${process.env.NEXT_PUBLIC_BASE_URL}/list-language`,
+//             { country: countryName }
+//           );
+
+//           const formatter = new Intl.NumberFormat('en-US', {
+//             notation: 'compact',
+//             compactDisplay: 'short'
+//           });
+          
+//           const formattedNumber = formatter.format(Number(response.data.languages.length > 0 ? response.data.languages.length : 0));
+//           setInfoToggle(false)
+//           setSidebarData(response.data.languages);
+//           setSideToggle(true);
+//           setTotalCount(formattedNumber);
+//           setSidebarClone(response.data.languages);
+//         } catch (err) {
+//           setSideToggle(false);
+//           toast(`Languages not found for country ${countryName}`, {
+//             style: {
+//               width: "70vw"
+//             }
+//           });
+//           console.log(err);
+//         }
+//       }
+//     }
+
+//     getLangData();
+//   }, [countryName]);
+
+//   // Handle sidebar click
+//   const handleSidebarClick = async (language) => {
+//     try {
+//       const response = await axios.post(
+//         `${process.env.NEXT_PUBLIC_BASE_URL}/language-details`,
+//         { language: language }
+//       );
+
+//       let arr = ["id", "Sl No", "createdAt", "updatedAt"];
+//       const filcard = {};
+//       const resdata = response.data.languageDetails;
+//       console.log(response.data)
+//       Object.entries(resdata).map(([key, value]) => {
+//         if (!arr.includes(key.toString()) && value) {
+//           filcard[key] = value;
+//         }
+//       });
+
+//       setToggle({ toggle: !toggle.toggle, char: language });
+//       setCard(response.data.languageDetails);
+//       setInfoToggle(true);
+
+//       clearPolygons();
+
+//       if (response.data.polygons && map) {
+//         const newPolygons = [];
+//         response.data.polygons.forEach((polygonData, index) => {
+//           if (polygonData.coordinates && Array.isArray(polygonData.coordinates)) {
+//             polygonData.coordinates.forEach((coordinateSet, setIndex) => {
+//               if (Array.isArray(coordinateSet) && coordinateSet.length > 0) {
+//                 const paths = coordinateSet.map((point) => {
+//                   if (Array.isArray(point) && point.length === 2) {
+//                     const [lng, lat] = point.map(parseFloat);
+//                     if (isFinite(lat) && isFinite(lng)) {
+//                       return { lat, lng };
+//                     }
+//                   }
+//                   return null;
+//                 }).filter(coord => coord !== null);
+
+//                 if (paths.length > 2) {
+//                   const newPolygon = new window.google.maps.Polygon({
+//                     paths: paths,
+//                     strokeColor: "#FF0000",
+//                     strokeOpacity: 0.8,
+//                     strokeWeight: 2,
+//                     fillColor: "#FF0000",
+//                     fillOpacity: 0.35,
+//                   });
+
+//                   newPolygon.setMap(map);
+//                   newPolygons.push(newPolygon);
+//                 }
+//               }
+//             });
+//           }
+//         });
+//         setActivePolygons(newPolygons);
+//       }
+//     } catch (err) {
+//       console.error("Error fetching language details:", err);
+//     }
+//   };
+
+//   // Handle alphabet click
+//   const handleAlphabetClick = (letter) => {
+//     const sortedData = sidebarDataClone.filter((i) => i.startsWith(letter));
+
+//     if (clickedData.clicked === false && clickedData.char === 0) {
+//       if (sortedData.length > 0) {
+//         setClickedData({ clicked: true, char: letter });
+//         setSidebarData(sortedData);
+//       }
+//     } else {
+//       if (clickedData.char === letter) {
+//         setClickedData({ clicked: false, char: 0 });
+//         setSidebarData(sidebarDataClone);
+//       } else {
+//         if (sortedData.length > 0) {
+//           setClickedData({ clicked: true, char: letter });
+//           setSidebarData(sortedData);
+//         }
+//       }
+//     }
+//   };
+
+//   // Handle close
+//   const handleClose = () => {
+//     setToggle({ toggle: !toggle.toggle, char: 0 });
+//     setInfoToggle(false);
+//     setClickedData({ clicked: false, char: 0 });
+//     setSidebarData(sidebarDataClone);
+//     clearPolygons();
+//   };
+
+//   return (
+//     <div className="flex">
+//       <div><Toaster /></div>
+//       {sidebartoggle && (
+//         <div className="w-[20vw] h-[100vh] bg-white flex flex-col items-center">
+//           <div className='flex flex-col items-center absolute bottom-[16vh]'>
+//             <Image src={log} className="w-11 h-11" alt="logo" />
+//             <h3 className="text-black font-semibold text-xl mt-5">{countryName}</h3>
+//             <p className="text-black mt-3">Total Languages {totalcount}</p>
+//           </div>
+//           {infotoggle === false ? (
+//             <div className="w-full px-4 overflow-y-scroll flex justify-center">
+//               <div className="flex gap-y-5 flex-col absolute left-3 mt-5 max-h-[55vh] overflow-y-scroll">
+//                 {alphabet.split('').map((letter, index) => (
+//                   <div
+//                     className={`px-2 py-2 border-2 flex justify-center items-center ${
+//                       clickedData.clicked === true && clickedData.char === letter
+//                         ? 'border-green-500 bg-[#5f9253] text-white'
+//                         : 'border-slate-400 text-black'
+//                     } rounded-xl cursor-pointer`}
+//                     key={index}
+//                     onClick={() => handleAlphabetClick(letter)}
+//                   >
+//                     {letter}
+//                   </div>
+//                 ))}
+//               </div>
+//               <div className='w-[40%] max-h-[55vh]'>
+//                 {sidebarData.map((i, index) => (
+//                   <div
+//                     style={{ overflowX: 'hidden' }}
+//                     className={`px-7 py-3 mt-5 border-2 ${
+//                       toggle.toggle === true && toggle.char === i
+//                         ? 'text-white bg-[#5f9253] border-green-500'
+//                         : 'text-black border-slate-400'
+//                     } flex justify-center rounded-[0.7rem] cursor-pointer`}
+//                     key={index}
+//                     onClick={() => handleSidebarClick(i)}
+//                   >
+//                     {i}
+//                   </div>
+//                 ))}
+//               </div>
+//             </div>
+//           ) : (
+//             <div>
+//               <div className="w-full py-5 text-black text-[1rem] rounded-xl">
+//                 {toggle.toggle && (
+//                   <div className="w-full flex flex-col items-center px-10">
+//                     <div className="overflow-y-scroll overflow-x-hidden w-[16vw] h-[30vh] rounded-xl px-10 bg-white">
+//                       <div className='w-full'>
+//                         {cardData && Object.keys(cardData).length > 0 ? (
+//                           Object.entries(cardData).map(([key, value]) => (
+//                             <h2 key={key} className="text-black mt-3 text-sm">
+//                               {(value && !["id", "Sl_No", "createdAt", "updatedAt"].includes(String(key).trim())) 
+//                                 ? `${key.replace(/_/g, ' ')} : ${value != null ? value.toString() : ""}`
+//                                 : ""}
+//                             </h2>
+//                           ))
+//                         ) : (
+//                           <p className="text-black mt-3 text-xl">No data available</p>
+//                         )}
+//                       </div>
+//                     </div>
+//                     <button 
+//                       className="w-[60%] bg-red-400 text-white py-3 rounded-xl mt-3"
+//                       onClick={handleClose}
+//                     >
+//                       Close
+//                     </button>
+//                   </div>
+//                 )}
+//               </div>
+//             </div>
+//           )}
+//         </div>
+//       )}
+//       <div className="main">
+//         <div 
+//           ref={mapRef} 
+//           className={`${sidebartoggle ? "w-[80vw] h-[100vh] relative" : "w-[100vw] h-[100vh] relative"}`} 
+//           id="map"
+//         />
+//       </div>
+//     </div>
+//   );
+// }
+
+
+// -------------------------------------------- currently working code
+
+// "use client"
+// import { useEffect, useRef, useState } from 'react';
+// import Image from 'next/image';
+// import log from '../../../public/logo.png';
+// import axios from 'axios';
+// import toast, { Toaster } from 'react-hot-toast';
+
+// export default function Home() {
+//   const mapRef = useRef(null);
+//   const [map, setMap] = useState(null);
+//   const [countryName, setCountryName] = useState('');
+//   const [totalcount, setTotalCount] = useState(0);
+//   const [sidebarData, setSidebarData] = useState([]);
+//   const [sidebarDataClone, setSidebarClone] = useState([]);
+//   const [cardData, setCard] = useState({});
+//   const [clickedData, setClickedData] = useState({ clicked: false, char: 0 });
+//   const [toggle, setToggle] = useState({ toggle: false, char: 0 });
+//   const [sidebartoggle, setSideToggle] = useState(false);
+//   const [infotoggle, setInfoToggle] = useState(false);
+//   const [activePolygons, setActivePolygons] = useState([]);
+//   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+//   // Inactivity timer setup
+//   useEffect(() => {
+//     let inactivityTimer;
+    
+//     const resetTimer = () => {
+//       if (inactivityTimer) {
+//         clearTimeout(inactivityTimer);
+//       }
+//       inactivityTimer = setTimeout(() => {
+//         window.location.reload();
+//       }, 300000); // 5 minutes
+//     };
+    
+//     const activityEvents = [
+//       'mousedown',
+//       'mousemove',
+//       'keydown',
+//       'scroll',
+//       'touchstart',
+//       'touchmove'
+//     ];
+    
+//     activityEvents.forEach(event => {
+//       document.addEventListener(event, resetTimer);
+//     });
+    
+//     resetTimer();
+    
+//     return () => {
+//       if (inactivityTimer) {
+//         clearTimeout(inactivityTimer);
+//       }
+//       activityEvents.forEach(event => {
+//         document.removeEventListener(event, resetTimer);
+//       });
+//     };
+//   }, []);
+
+//   // Google Maps initialization
+//   useEffect(() => {
+//     const script = document.createElement('script');
+//     script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&callback=initMap`;
+//     script.async = true;
+//     script.defer = true;
+//     document.head.appendChild(script);
+
+//     window.initMap = () => {
+//       const mapInstance = new window.google.maps.Map(mapRef.current, {
+//         center: { lat: 20, lng: 0 },
+//         zoom: 3,
+//         minZoom: 3,
+//         maxZoom: 7,
+//         mapTypeId: 'roadmap',
+//         disableDefaultUI: true,
+//         streetViewControl: false,
+//         fullscreenControl: false,
+//         mapTypeControl: false,
+//         restriction: {
+//           latLngBounds: {
+//             north: 85,
+//             south: -85,
+//             west: -180,
+//             east: 180,
+//           },
+//           strictBounds: true,
+//         },
+//       });
+
+//       setMap(mapInstance);
+
+//       mapInstance.addListener('center_changed', () => {
+//         const center = mapInstance.getCenter();
+//         let lng = center.lng();
+//         if (lng < -170) {
+//           lng += 360;
+//         } else if (lng > 180) {
+//           lng -= 360;
+//         }
+//         if (lng !== center.lng()) {
+//           mapInstance.panTo({ lat: center.lat(), lng: lng });
+//         }
+//       });
+
+//       mapInstance.addListener('zoom_changed', () => {
+//         if (mapInstance.getZoom() < mapInstance.get('minZoom')) {
+//           mapInstance.setZoom(mapInstance.get('minZoom'));
+//         }
+//         if (mapInstance.getZoom() > mapInstance.get('maxZoom')) {
+//           mapInstance.setZoom(mapInstance.get('maxZoom'));
+//         }
+//       });
+
+//       mapInstance.addListener('click', (event) => {
+//         const lat = event.latLng.lat();
+//         const lng = event.latLng.lng();
+//         console.log(lat, lng);
+
+//         async function getCountryName() {
+//           try {
+//             const response = await axios.get(
+//               `https://nominatim.openstreetmap.org/reverse?format=json&lat=${String(lat)}&lon=${String(lng)}&zoom=18&addressdetails=1`
+//             );
+//             console.log(response);
+//             if (response.data.address.country) {
+//               setCountryName(response.data.address.country);
+//             }
+//           } catch (err) {
+//             setSideToggle(false);
+//             console.log(err);
+//           }
+//         }
+//         getCountryName();
+//       });
+//     };
+
+//     return () => {
+//       document.head.removeChild(script);
+//       delete window.initMap;
+//     };
+//   }, []);
+
+//   // Clear polygons function
+//   const clearPolygons = () => {
+//     activePolygons.forEach(polygon => {
+//       polygon.setMap(null);
+//     });
+//     setActivePolygons([]);
+//   };
+
+//   // Fetch language data when country changes
+//   useEffect(() => {
+//     async function getLangData() {
+//       if (countryName) {
+//         try {
+//           const response = await axios.post(
+//             `${process.env.NEXT_PUBLIC_BASE_URL}/list-language`,
+//             { country: countryName }
+//           );
+
+//           const formatter = new Intl.NumberFormat('en-US', {
+//             notation: 'compact',
+//             compactDisplay: 'short'
+//           });
+          
+//           const formattedNumber = formatter.format(Number(response.data.languages.length > 0 ? response.data.languages.length : 0));
+//           setInfoToggle(false)
+//           setSidebarData(response.data.languages);
+//           setSideToggle(true);
+//           setTotalCount(formattedNumber);
+//           setSidebarClone(response.data.languages);
+//         } catch (err) {
+//           setSideToggle(false);
+//           toast(`Languages not found for country ${countryName}`, {
+//             style: {
+//               width: "70vw"
+//             }
+//           });
+//           console.log(err);
+//         }
+//       }
+//     }
+
+//     getLangData();
+//   }, [countryName]);
+
+//   // Handle sidebar click
+//   // const handleSidebarClick = async (language) => {
+//   //   try {
+//   //     const response = await axios.post(
+//   //       `${process.env.NEXT_PUBLIC_BASE_URL}/language-details`,
+//   //       { language: language }
+//   //     );
+
+//   //     let arr = ["id", "Sl No", "createdAt", "updatedAt"];
+//   //     const filcard = {};
+//   //     const resdata = response.data.languageDetails;
+//   //     console.log(response.data)
+//   //     Object.entries(resdata).map(([key, value]) => {
+//   //       if (!arr.includes(key.toString()) && value) {
+//   //         filcard[key] = value;
+//   //       }
+//   //     });
+
+//   //     setToggle({ toggle: !toggle.toggle, char: language });
+//   //     setCard(response.data.languageDetails);
+//   //     setInfoToggle(true);
+
+//   //     clearPolygons();
+
+//   //     if (response.data.polygons && map) {
+//   //       const newPolygons = [];
+//   //       response.data.polygons.forEach((polygonData, index) => {
+//   //         if (polygonData.coordinates && Array.isArray(polygonData.coordinates)) {
+//   //           polygonData.coordinates.forEach((coordinateSet, setIndex) => {
+//   //             if (Array.isArray(coordinateSet) && coordinateSet.length > 0) {
+//   //               const paths = coordinateSet.map((point) => {
+//   //                 if (Array.isArray(point) && point.length === 2) {
+//   //                   const [lng, lat] = point.map(parseFloat);
+//   //                   if (isFinite(lat) && isFinite(lng)) {
+//   //                     return { lat, lng };
+//   //                   }
+//   //                 }
+//   //                 return null;
+//   //               }).filter(coord => coord !== null);
+
+//   //               if (paths.length > 2) {
+//   //                 const newPolygon = new window.google.maps.Polygon({
+//   //                   paths: paths,
+//   //                   strokeColor: "#FF0000",
+//   //                   strokeOpacity: 0.8,
+//   //                   strokeWeight: 2,
+//   //                   fillColor: "#FF0000",
+//   //                   fillOpacity: 0.35,
+//   //                 });
+
+//   //                 newPolygon.setMap(map);
+//   //                 newPolygons.push(newPolygon);
+//   //               }
+//   //             }
+//   //           });
+//   //         }
+//   //       });
+//   //       setActivePolygons(newPolygons);
+//   //     }
+//   //   } catch (err) {
+//   //     console.error("Error fetching language details:", err);
+//   //   }
+//   // };
+
+//   // Inside your handleSidebarClick function, replace the polygon drawing code with this:
+
+// const handleSidebarClick = async (language) => {
+//   try {
+//     const response = await axios.post(
+//       `${process.env.NEXT_PUBLIC_BASE_URL}/language-details`,
+//       { language: language }
+//     );
+
+//     let arr = ["id", "Sl No", "createdAt", "updatedAt"];
+//     const filcard = {};
+//     console.log(response.data)
+//     const resdata = response.data.languageDetails;
+//     Object.entries(resdata).map(([key, value]) => {
+//       if (!arr.includes(key.toString()) && value) {
+//         filcard[key] = value;
+//       }
+//     });
+
+//     setToggle({ toggle: !toggle.toggle, char: language });
+//     setCard(response.data.languageDetails);
+//     setInfoToggle(true);
+
+//     clearPolygons();
+
+//     // New polygon drawing code
+//     if (response.data.polygons && map) {
+//       const newPolygons = [];
+//       response.data.polygons.forEach((polygonData) => {
+//         if (polygonData.coords && Array.isArray(polygonData.coords)) {
+//           polygonData.coords.forEach((coordinateSet) => {
+//             if (Array.isArray(coordinateSet) && coordinateSet.length > 0) {
+//               const paths = coordinateSet.map((point) => {
+//                 if (Array.isArray(point) && point.length === 2) {
+//                   const [lng, lat] = point;
+//                   if (isFinite(lat) && isFinite(lng)) {
+//                     return { lat, lng };
+//                   }
+//                 }
+//                 return null;
+//               }).filter(coord => coord !== null);
+
+//               if (paths.length > 2) {
+//                 const newPolygon = new window.google.maps.Polygon({
+//                   paths: paths,
+//                   strokeColor: "#FF0000",
+//                   strokeOpacity: 0.8,
+//                   strokeWeight: 2,
+//                   fillColor: "#FF0000",
+//                   fillOpacity: 0.35,
+//                 });
+
+//                 newPolygon.setMap(map);
+//                 newPolygons.push(newPolygon);
+
+//                 // Optional: Fit bounds to show the polygon
+//                 const bounds = new window.google.maps.LatLngBounds();
+//                 paths.forEach(path => bounds.extend(path));
+//                 map.fitBounds(bounds);
+//               }
+//             }
+//           });
+//         }
+//       });
+//       setActivePolygons(newPolygons);
+//     }
+//   } catch (err) {
+//     console.error("Error fetching language details:", err);
+//   }
+// };
+//   // Handle alphabet click
+//   const handleAlphabetClick = (letter) => {
+//     const sortedData = sidebarDataClone.filter((i) => i.startsWith(letter));
+
+//     if (clickedData.clicked === false && clickedData.char === 0) {
+//       if (sortedData.length > 0) {
+//         setClickedData({ clicked: true, char: letter });
+//         setSidebarData(sortedData);
+//       }
+//     } else {
+//       if (clickedData.char === letter) {
+//         setClickedData({ clicked: false, char: 0 });
+//         setSidebarData(sidebarDataClone);
+//       } else {
+//         if (sortedData.length > 0) {
+//           setClickedData({ clicked: true, char: letter });
+//           setSidebarData(sortedData);
+//         }
+//       }
+//     }
+//   };
+
+//   // Handle close
+//   const handleClose = () => {
+//     setToggle({ toggle: !toggle.toggle, char: 0 });
+//     setInfoToggle(false);
+//     setClickedData({ clicked: false, char: 0 });
+//     setSidebarData(sidebarDataClone);
+//     clearPolygons();
+//   };
+
+//   return (
+//     <div className="flex">
+//       <div><Toaster /></div>
+//       {sidebartoggle && (
+//         <div className="w-[20vw] h-[100vh] bg-white flex flex-col items-center">
+//           <div className='flex flex-col items-center absolute bottom-[16vh]'>
+//             <Image src={log} className="w-11 h-11" alt="logo" />
+//             <h3 className="text-black font-semibold text-xl mt-5">{countryName}</h3>
+//             <p className="text-black mt-3">Total Languages {totalcount}</p>
+//           </div>
+//           {infotoggle === false ? (
+//             <div className="w-full px-4 overflow-y-scroll flex justify-center">
+//               <div className="flex gap-y-5 flex-col absolute left-3 mt-5 max-h-[55vh] overflow-y-scroll">
+//                 {alphabet.split('').map((letter, index) => (
+//                   <div
+//                     className={`px-2 py-2 border-2 flex justify-center items-center ${
+//                       clickedData.clicked === true && clickedData.char === letter
+//                         ? 'border-green-500 bg-[#5f9253] text-white'
+//                         : 'border-slate-400 text-black'
+//                     } rounded-xl cursor-pointer`}
+//                     key={index}
+//                     onClick={() => handleAlphabetClick(letter)}
+//                   >
+//                     {letter}
+//                   </div>
+//                 ))}
+//               </div>
+//               <div className='w-[40%] max-h-[55vh]'>
+//                 {sidebarData.map((i, index) => (
+//                   <div
+//                     style={{ overflowX: 'hidden' }}
+//                     className={`px-7 py-3 mt-5 border-2 ${
+//                       toggle.toggle === true && toggle.char === i
+//                         ? 'text-white bg-[#5f9253] border-green-500'
+//                         : 'text-black border-slate-400'
+//                     } flex justify-center rounded-[0.7rem] cursor-pointer`}
+//                     key={index}
+//                     onClick={() => handleSidebarClick(i)}
+//                   >
+//                     {i}
+//                   </div>
+//                 ))}
+//               </div>
+//             </div>
+//           ) : (
+//             <div>
+//               <div className="w-full py-5 text-black text-[1rem] rounded-xl">
+//                 {toggle.toggle && (
+//                   <div className="w-full flex flex-col items-center px-10">
+//                     <div className="overflow-y-scroll overflow-x-hidden w-[16vw] h-[30vh] rounded-xl px-10 bg-white">
+//                       <div className='w-full'>
+//                         {cardData && Object.keys(cardData).length > 0 ? (
+//                           Object.entries(cardData).map(([key, value]) => (
+//                             <h2 key={key} className="text-black mt-3 text-sm">
+//                               {(value && !["id", "Sl_No", "createdAt", "updatedAt"].includes(String(key).trim())) 
+//                                 ? `${key.replace(/_/g, ' ')} : ${value != null ? value.toString() : ""}`
+//                                 : ""}
+//                             </h2>
+//                           ))
+//                         ) : (
+//                           <p className="text-black mt-3 text-xl">No data available</p>
+//                         )}
+//                       </div>
+//                     </div>
+//                     <button 
+//                       className="w-[60%] bg-red-400 text-white py-3 rounded-xl mt-3"
+//                       onClick={handleClose}
+//                     >
+//                       Close
+//                     </button>
+//                   </div>
+//                 )}
+//               </div>
+//             </div>
+//           )}
+//         </div>
+//       )}
+//       <div className="main">
+//         <div 
+//           ref={mapRef} 
+//           className={`${sidebartoggle ? "w-[80vw] h-[100vh] relative" : "w-[100vw] h-[100vh] relative"}`} 
+//           id="map"
+//         />
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
+// ----------------------------done
 "use client"
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
@@ -1049,6 +1867,9 @@ import log from '../../../public/logo.png';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 
+// Helper function to format field values
+
+// --------------------------------------------
 export default function Home() {
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);
@@ -1062,6 +1883,7 @@ export default function Home() {
   const [sidebartoggle, setSideToggle] = useState(false);
   const [infotoggle, setInfoToggle] = useState(false);
   const [activePolygons, setActivePolygons] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
   // Inactivity timer setup
@@ -1134,6 +1956,7 @@ export default function Home() {
 
       setMap(mapInstance);
 
+      // Map event listeners
       mapInstance.addListener('center_changed', () => {
         const center = mapInstance.getCenter();
         let lng = center.lng();
@@ -1156,26 +1979,23 @@ export default function Home() {
         }
       });
 
-      mapInstance.addListener('click', (event) => {
+      mapInstance.addListener('click', async (event) => {
         const lat = event.latLng.lat();
         const lng = event.latLng.lng();
-        console.log(lat, lng);
-
-        async function getCountryName() {
-          try {
-            const response = await axios.get(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${String(lat)}&lon=${String(lng)}&zoom=18&addressdetails=1`
-            );
-            console.log(response);
-            if (response.data.address.country) {
-              setCountryName(response.data.address.country);
-            }
-          } catch (err) {
-            setSideToggle(false);
-            console.log(err);
+        
+        try {
+          const response = await axios.get(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
+          );
+          
+          if (response.data.address.country) {
+            setCountryName(response.data.address.country);
           }
+        } catch (err) {
+          setSideToggle(false);
+          toast.error('Failed to get country information');
+          console.error(err);
         }
-        getCountryName();
       });
     };
 
@@ -1197,6 +2017,7 @@ export default function Home() {
   useEffect(() => {
     async function getLangData() {
       if (countryName) {
+        setIsLoading(true);
         try {
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_BASE_URL}/list-language`,
@@ -1208,20 +2029,18 @@ export default function Home() {
             compactDisplay: 'short'
           });
           
-          const formattedNumber = formatter.format(Number(response.data.languages.length > 0 ? response.data.languages.length : 0));
-
+          const formattedNumber = formatter.format(response.data.languages.length || 0);
+          setInfoToggle(false);
           setSidebarData(response.data.languages);
           setSideToggle(true);
           setTotalCount(formattedNumber);
           setSidebarClone(response.data.languages);
         } catch (err) {
           setSideToggle(false);
-          toast(`Languages not found for country ${countryName}`, {
-            style: {
-              width: "70vw"
-            }
-          });
-          console.log(err);
+          toast.error(`Languages not found for country ${countryName}`);
+          console.error(err);
+        } finally {
+          setIsLoading(false);
         }
       }
     }
@@ -1231,23 +2050,15 @@ export default function Home() {
 
   // Handle sidebar click
   const handleSidebarClick = async (language) => {
+    setIsLoading(true);
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BASE_URL}/language-details`,
         { language: language }
       );
 
-      let arr = ["id", "Sl No", "createdAt", "updatedAt"];
-      const filcard = {};
-      const resdata = response.data.languageDetails;
-
-      Object.entries(resdata).map(([key, value]) => {
-        if (!arr.includes(key.toString()) && value) {
-          filcard[key] = value;
-        }
-      });
-
-      setToggle({ toggle: !toggle.toggle, char: language });
+      console.log(response.data)
+      setToggle({ toggle: true, char: language });
       setCard(response.data.languageDetails);
       setInfoToggle(true);
 
@@ -1255,41 +2066,40 @@ export default function Home() {
 
       if (response.data.polygons && map) {
         const newPolygons = [];
-        response.data.polygons.forEach((polygonData, index) => {
-          if (polygonData.coordinates && Array.isArray(polygonData.coordinates)) {
-            polygonData.coordinates.forEach((coordinateSet, setIndex) => {
-              if (Array.isArray(coordinateSet) && coordinateSet.length > 0) {
-                const paths = coordinateSet.map((point) => {
-                  if (Array.isArray(point) && point.length === 2) {
-                    const [lng, lat] = point.map(parseFloat);
-                    if (isFinite(lat) && isFinite(lng)) {
-                      return { lat, lng };
-                    }
-                  }
-                  return null;
-                }).filter(coord => coord !== null);
+        response.data.polygons.forEach((polygonData) => {
+          if (polygonData.coords && Array.isArray(polygonData.coords)) {
+            const paths = polygonData.coords.map(coord => ({
+              lat: parseFloat(coord.lat),
+              lng: parseFloat(coord.lng)
+            }));
 
-                if (paths.length > 2) {
-                  const newPolygon = new window.google.maps.Polygon({
-                    paths: paths,
-                    strokeColor: "#FF0000",
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: "#FF0000",
-                    fillOpacity: 0.35,
-                  });
+            if (paths.length > 2) {
+              const newPolygon = new window.google.maps.Polygon({
+                paths: paths,
+                strokeColor: "#FF0000",
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: "#FF0000",
+                fillOpacity: 0.35,
+              });
 
-                  newPolygon.setMap(map);
-                  newPolygons.push(newPolygon);
-                }
-              }
-            });
+              newPolygon.setMap(map);
+              newPolygons.push(newPolygon);
+
+              // Fit bounds to show the polygon
+              const bounds = new window.google.maps.LatLngBounds();
+              paths.forEach(path => bounds.extend(path));
+              map.fitBounds(bounds);
+            }
           }
         });
         setActivePolygons(newPolygons);
       }
     } catch (err) {
       console.error("Error fetching language details:", err);
+      toast.error("Failed to fetch language details");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -1317,7 +2127,7 @@ export default function Home() {
 
   // Handle close
   const handleClose = () => {
-    setToggle({ toggle: !toggle.toggle, char: 0 });
+    setToggle({ toggle: false, char: 0 });
     setInfoToggle(false);
     setClickedData({ clicked: false, char: 0 });
     setSidebarData(sidebarDataClone);
@@ -1328,7 +2138,12 @@ export default function Home() {
     <div className="flex">
       <div><Toaster /></div>
       {sidebartoggle && (
-        <div className="w-[20vw] h-[100vh] bg-white flex flex-col items-center">
+        <div className="w-[20vw] h-[100vh] bg-white flex flex-col items-center relative">
+          {isLoading && (
+            <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            </div>
+          )}
           <div className='flex flex-col items-center absolute bottom-[16vh]'>
             <Image src={log} className="w-11 h-11" alt="logo" />
             <h3 className="text-black font-semibold text-xl mt-5">{countryName}</h3>
@@ -1343,7 +2158,7 @@ export default function Home() {
                       clickedData.clicked === true && clickedData.char === letter
                         ? 'border-green-500 bg-[#5f9253] text-white'
                         : 'border-slate-400 text-black'
-                    } rounded-xl cursor-pointer`}
+                    } rounded-xl cursor-pointer hover:bg-gray-100`}
                     key={index}
                     onClick={() => handleAlphabetClick(letter)}
                   >
@@ -1359,7 +2174,7 @@ export default function Home() {
                       toggle.toggle === true && toggle.char === i
                         ? 'text-white bg-[#5f9253] border-green-500'
                         : 'text-black border-slate-400'
-                    } flex justify-center rounded-[0.7rem] cursor-pointer`}
+                    } flex justify-center rounded-[0.7rem] cursor-pointer hover:bg-gray-50`}
                     key={index}
                     onClick={() => handleSidebarClick(i)}
                   >
@@ -1369,6 +2184,20 @@ export default function Home() {
               </div>
             </div>
           ) : (
+            // <div className="w-full h-[70vh] overflow-y-auto">
+            //   {toggle.toggle && (
+            //     <div className="w-full flex flex-col items-center px-4">
+            //       <DetailsCard data={cardData} />
+            //       <button 
+            //         className="w-[60%] bg-red-400 text-white py-3 rounded-xl mt-3 mb-4 hover:bg-red-500 transition-colors"
+            //         onClick={handleClose}
+            //       >
+            //         Close
+            //       </button>
+            //     </div>
+            //   )}
+            // </div>
+
             <div>
               <div className="w-full py-5 text-black text-[1rem] rounded-xl">
                 {toggle.toggle && (
@@ -1378,7 +2207,7 @@ export default function Home() {
                         {cardData && Object.keys(cardData).length > 0 ? (
                           Object.entries(cardData).map(([key, value]) => (
                             <h2 key={key} className="text-black mt-3 text-sm">
-                              {(value && !["id", "Sl_No", "createdAt", "updatedAt"].includes(String(key).trim())) 
+                              {(value && !["id", "Sl_No", "createdAt", "updatedAt", "Script_Yes_No"].includes(String(key).trim())) 
                                 ? `${key.replace(/_/g, ' ')} : ${value != null ? value.toString() : ""}`
                                 : ""}
                             </h2>
@@ -1398,7 +2227,8 @@ export default function Home() {
                 )}
               </div>
             </div>
-          )}
+          )
+          }
         </div>
       )}
       <div className="main">
@@ -1411,3 +2241,5 @@ export default function Home() {
     </div>
   );
 }
+
+//--------------------

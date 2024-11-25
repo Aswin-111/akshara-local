@@ -265,7 +265,7 @@ function Admin() {
 
               const coordinates = JSON.parse(coordRef.current.value)
               console.log(coordinates);
-              const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/polygons`, { coordinates, state, language, country, strokeColor: "#FF0000", fillColor: "#FF0000" })
+              const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/single-polygon`, { coordinates, state, language, country, strokeColor: "#FF0000", fillColor: "#FF0000" })
 
 
               console.log(response)
