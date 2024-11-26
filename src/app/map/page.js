@@ -1863,7 +1863,7 @@
 "use client"
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import log from '../../../public/logo.png';
+import log from '../../../public/logo.svg';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -1980,10 +1980,11 @@ export default function Home() {
       });
 
       mapInstance.addListener('click', async (event) => {
-        const lat = event.latLng.lat();
-        const lng = event.latLng.lng();
+        
         
         try {
+          const lat = event.latLng.lat();
+          const lng = event.latLng.lng();
           const response = await axios.get(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
           );
@@ -2158,7 +2159,7 @@ export default function Home() {
                       clickedData.clicked === true && clickedData.char === letter
                         ? 'border-green-500 bg-[#5f9253] text-white'
                         : 'border-slate-400 text-black'
-                    } rounded-xl cursor-pointer hover:bg-gray-100`}
+                    } rounded-xl cursor-pointer hover:bg-gray-100 text-[1rem]`}
                     key={index}
                     onClick={() => handleAlphabetClick(letter)}
                   >
@@ -2166,11 +2167,11 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              <div className='w-[40%] max-h-[55vh]'>
+              <div className='w-[70%] max-h-[55vh]'>
                 {sidebarData.map((i, index) => (
                   <div
                     style={{ overflowX: 'hidden' }}
-                    className={`px-7 py-3 mt-5 border-2 ${
+                    className={`w-full  py-3 mt-5 ml-5 border-2 text-[0.7rem] ${
                       toggle.toggle === true && toggle.char === i
                         ? 'text-white bg-[#5f9253] border-green-500'
                         : 'text-black border-slate-400'
